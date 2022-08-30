@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.3.32819.101
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WireGuardNT-PInvoke", "WireGuardNT-PInvoke\WireGuardNT-PInvoke.csproj", "{9D46F774-A797-4FC9-8642-3193312D3124}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Example", "Example\Example.csproj", "{DA0790E6-903F-4A80-9C51-96020FD05D6F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{9D46F774-A797-4FC9-8642-3193312D3124}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9D46F774-A797-4FC9-8642-3193312D3124}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9D46F774-A797-4FC9-8642-3193312D3124}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9D46F774-A797-4FC9-8642-3193312D3124}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DA0790E6-903F-4A80-9C51-96020FD05D6F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DA0790E6-903F-4A80-9C51-96020FD05D6F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DA0790E6-903F-4A80-9C51-96020FD05D6F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DA0790E6-903F-4A80-9C51-96020FD05D6F}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {CF5D73F9-1C42-47B4-8AD6-A420F325F93C}
+	EndGlobalSection
+EndGlobal
