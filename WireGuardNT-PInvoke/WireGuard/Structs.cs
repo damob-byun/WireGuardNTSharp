@@ -82,11 +82,7 @@ namespace WireGuardNT_PInvoke.WireGuard
         public fixed byte PrivateKey[32];
         public fixed byte PublicKey[32];
         public UInt32 PeersCount;
-
-        public static explicit operator IntPtr(IoctlInterface v)
-        {
-            throw new NotImplementedException();
-        }
+        
     }
     public enum IoctlPeerFlags : UInt32
     {

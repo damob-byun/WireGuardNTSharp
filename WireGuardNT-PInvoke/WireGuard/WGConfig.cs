@@ -16,7 +16,7 @@ namespace WireGuardNT_PInvoke.WireGuard
         public IPAddress[] DnsAddresses { get; set; }
 
         public ushort InterfaceMtu = 1420;
-
+        public WGPeer[] Peers { get; set; }
         public ushort InterfaceListenPort { get; set; }
 
         public ConfigBuffer ConfigBuffer;

@@ -118,6 +118,7 @@ namespace WireGuardNT_PInvoke
 
 
             wgConfig.LoctlWireGuardConfig.WgPeerConfigs = new loctlWgPeerConfig[peerSize];
+            wgConfig.Peers = new WGPeer[peerSize];
 
             foreach (var line in lines)
             {
@@ -205,11 +206,13 @@ namespace WireGuardNT_PInvoke
 
                 if (IsPeerSection)
                 {
+                    var Peer = wgConfig.Peers[peerCount - 1];
                     switch (key)
                     {
                         case "publickey":
                             wgConfig.LoctlWireGuardConfig.WgPeerConfigs[peerCount - 1].client.Flags |= IoctlPeerFlags.HasPublicKey;
                             var publicKey = Convert.FromBase64String(value);
+                            
                             fixed (byte* p = wgConfig.LoctlWireGuardConfig.WgPeerConfigs[peerCount - 1].client.PublicKey)
                             {
                                 Marshal.Copy(publicKey, 0, (IntPtr)p, 32);
@@ -225,20 +228,32 @@ namespace WireGuardNT_PInvoke
                             continue;
                         case "allowedips":
                             //TODO: support severals
-                            var allowedIpStr = value.Split(',').First().Trim();
-                            var allowIp = IPNetwork.Parse(allowedIpStr);
-                            if (allowIp.AddressFamily == AddressFamily.InterNetworkV6)
+                            var allowedIpStrArr = value.Split(',');
+                            //Peer.AllowedIPs = new AllowedIP[allowedIpStrArr.Length];
+                            
+                            for (int i = 0; i < allowedIpStrArr.Length; i++)
+                            {
+                                var allowedIpStr = allowedIpStrArr[i];
+                                var allowIpObj = IPNetwork.Parse(allowedIpStr);
+                               // Peer.AllowedIPs[i].Address = allowIpObj.Network;
+                               // Peer.AllowedIPs[i].Cidr = allowIpObj.Cidr;
+                            }
+
+                            var allowedIpTopStr = value.Split(',').First().Trim();
+                            var allowTopIp = IPNetwork.Parse(allowedIpTopStr);
+                            
+                            if (allowTopIp.AddressFamily == AddressFamily.InterNetworkV6)
                             {
                                 wgConfig.LoctlWireGuardConfig.WgPeerConfigs[peerCount - 1].allowdIp.AddressFamily = Win32.ADDRESS_FAMILY.AF_INET6;
-                                wgConfig.LoctlWireGuardConfig.WgPeerConfigs[peerCount - 1].allowdIp.Cidr = allowIp.Cidr;
+                                wgConfig.LoctlWireGuardConfig.WgPeerConfigs[peerCount - 1].allowdIp.Cidr = allowTopIp.Cidr;
 
-                                wgConfig.LoctlWireGuardConfig.WgPeerConfigs[peerCount - 1].allowdIp.V6.Addr = allowIp.Network;
+                                wgConfig.LoctlWireGuardConfig.WgPeerConfigs[peerCount - 1].allowdIp.V6.Addr = allowTopIp.Network;
                             }
-                            else if (allowIp.AddressFamily == AddressFamily.InterNetwork)
+                            else if (allowTopIp.AddressFamily == AddressFamily.InterNetwork)
                             {
                                 wgConfig.LoctlWireGuardConfig.WgPeerConfigs[peerCount - 1].allowdIp.AddressFamily = Win32.ADDRESS_FAMILY.AF_INET;
-                                wgConfig.LoctlWireGuardConfig.WgPeerConfigs[peerCount - 1].allowdIp.Cidr = allowIp.Cidr;
-                                wgConfig.LoctlWireGuardConfig.WgPeerConfigs[peerCount - 1].allowdIp.V4.Addr = allowIp.Network;
+                                wgConfig.LoctlWireGuardConfig.WgPeerConfigs[peerCount - 1].allowdIp.Cidr = allowTopIp.Cidr;
+                                wgConfig.LoctlWireGuardConfig.WgPeerConfigs[peerCount - 1].allowdIp.V4.Addr = allowTopIp.Network;
                             }
 
                             wgConfig.LoctlWireGuardConfig.WgPeerConfigs[peerCount - 1].client.AllowedIPsCount = 1;

@@ -64,19 +64,47 @@ namespace Example // Note: actual namespace depends on the project name.
             var configAllLinesLine = File.ReadAllLines(configFile);
             _adapter.ParseConfFile(configAllLinesLine, out WgConfig);
 
+            
+            MIB_IPFORWARD_TABLE2 table;
+            lastError = Vanara.PInvoke.IpHlpApi.GetIpForwardTable2(Ws2_32.ADDRESS_FAMILY.AF_INET, out table);
+            if (lastError.Failed)
+            {
+                //Failed to get default route
+                Console.WriteLine("GetIpForwardTable2 " + lastError.ToString());
+            }
+
+            //for(var i=0; T)
+            for (var i = 0; i < table.NumEntries; i++)
+            {
+                var row = table.Table[i];
+                if (row.InterfaceLuid.Equals(_adapterLuid))
+                {
+                    Console.WriteLine("Start Delete Row [" + i + "] - Metric " + row.Metric);
+                    Vanara.PInvoke.IpHlpApi.DeleteIpForwardEntry2(ref table.Table[i]);
+                }
+                
+            }
+
+            //TODO: Endpoint Start
             Vanara.PInvoke.IpHlpApi.InitializeIpForwardEntry(out _ipforwardRow2);
             _ipforwardRow2.InterfaceLuid = _adapterLuid;
             _ipforwardRow2.NextHop.Ipv4.sin_addr = Ws2_32.IN_ADDR.INADDR_ANY;
             _ipforwardRow2.NextHop.si_family = Ws2_32.ADDRESS_FAMILY.AF_INET;
             _ipforwardRow2.Metric = 0;
+            _ipforwardRow2.Protocol = MIB_IPFORWARD_PROTO.MIB_IPPROTO_LOCAL;
             _ipforwardRow2.DestinationPrefix.Prefix.Ipv4.sin_addr = Ws2_32.IN_ADDR.INADDR_ANY;
             _ipforwardRow2.DestinationPrefix.Prefix.si_family = Ws2_32.ADDRESS_FAMILY.AF_INET;
-            
+
             lastError = Vanara.PInvoke.IpHlpApi.CreateIpForwardEntry2(ref _ipforwardRow2);
+            
             if (lastError.Failed)
             {
                 //Failed to set default route
                 Console.WriteLine("CreateIpForwardEntry2 " + lastError.ToString());
+            }
+            else
+            {
+                Console.WriteLine("Set default route" + lastError.ToString());
             }
 
             Vanara.PInvoke.IpHlpApi.InitializeUnicastIpAddressEntry(out _unicastipaddressRow);
@@ -92,12 +120,14 @@ namespace Example // Note: actual namespace depends on the project name.
                 //Failed to set IP address
                 Console.WriteLine("CreateUnicastIpAddressEntry " + lastError.ToString());
             }
+            else
+            {
+                Console.WriteLine("Set Ip address " + lastError.ToString());
+            }
 
             Vanara.PInvoke.IpHlpApi.InitializeIpInterfaceEntry(out _IpInterfaceRow);
             _IpInterfaceRow.InterfaceLuid = _adapterLuid;
             _IpInterfaceRow.Family = Ws2_32.ADDRESS_FAMILY.AF_INET;
-            _IpInterfaceRow.InterfaceIndex = 0;
-
 
             lastError = Vanara.PInvoke.IpHlpApi.GetIpInterfaceEntry(ref _IpInterfaceRow);
 
@@ -106,12 +136,18 @@ namespace Example // Note: actual namespace depends on the project name.
                 //Failed to get IP interface
                 Console.WriteLine("GetIpInterfaceEntry " + lastError.ToString());
             }
+            else
+            {
+                Console.WriteLine("Set Ip address " + lastError.ToString());
+            }
+
+            _IpInterfaceRow.ForwardingEnabled = true;
 
             _IpInterfaceRow.UseAutomaticMetric = false;
             _IpInterfaceRow.Metric = 0;
             _IpInterfaceRow.NlMtu = WgConfig.InterfaceMtu;
             _IpInterfaceRow.SitePrefixLength = 0;
-
+            
             lastError = Vanara.PInvoke.IpHlpApi.SetIpInterfaceEntry(_IpInterfaceRow);
 
             if (lastError.Failed)
@@ -119,14 +155,16 @@ namespace Example // Note: actual namespace depends on the project name.
                 //Failed to set metric and MTU
                 Console.WriteLine("SetIpInterfaceEntry " + lastError.ToString());
             }
+            else
+            {
+                Console.WriteLine("Set Metric and MTU " + lastError.ToString());
+            }
 
             foreach (var dnsAddress in WgConfig.DnsAddresses)
             {
                 Process.Start("netsh.exe", String.Format("interface ipv4 add dnsservers name={0} address={1} validate=no", adapterName, dnsAddress));
             }
-
-
-
+            
             _adapter.SetConfiguration(WgConfig);
             _adapter.SetStateUp();
 
