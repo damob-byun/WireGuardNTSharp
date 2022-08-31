@@ -68,6 +68,7 @@ namespace Example // Note: actual namespace depends on the project name.
                        {
                            Console.WriteLine($"Verbose output enabled. Current Arguments: -v {o.Verbose}");
                            Console.WriteLine("1.0.0");
+                           return;
                        }
                        if(o.ConfigPath != null && !o.ConfigPath.Equals(""))
                        {
