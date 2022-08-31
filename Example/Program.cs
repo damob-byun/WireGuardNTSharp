@@ -1,4 +1,6 @@
-﻿using System;
+﻿using CommandLine.Text;
+using CommandLine;
+using System;
 using System.Diagnostics;
 using System.Net;
 using Vanara.PInvoke;
@@ -20,6 +22,7 @@ namespace Example // Note: actual namespace depends on the project name.
         private static Vanara.PInvoke.IpHlpApi.MIB_IPFORWARD_ROW2 _ipforwardRow2;
 
         private static WgConfig WgConfig = new WgConfig();
+        
 
         public static void AddArch()
         {
@@ -35,23 +38,67 @@ namespace Example // Note: actual namespace depends on the project name.
             Environment.SetEnvironmentVariable("PATH", string.Join(Path.PathSeparator.ToString(), ((IEnumerable<string>)first).Concat<string>((IEnumerable<string>)second)));
 
         }
+        public class Options
+        {
+            [Option('v', "verbose", Required = false, HelpText = "Set output to verbose messages.")]
+            public bool Verbose { get; set; }
+            [Option('c', "config", Required = false, HelpText = "ConfigFile path.")]
+            public string? ConfigPath { get; set; }
+
+            [Option('n', "name", Required = false, HelpText = "Adapter Name.")]
+            public string? AdapterName { get; set; }
+
+            [Option('t', "tunnelType", Required = false, HelpText = "Adapter Name.")]
+            public string? TunnelType { get; set; }
+        }
         static void Main(string[] args)
         {
             Win32Error lastError;
 
             AddArch();
 
-            var baseName = System.IO.Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName); 
-            var configFile = System.IO.Path.Combine(baseName, "client.conf");
-            if (!File.Exists(configFile))
+            var configPath = "client.conf";
+            var adapterName = "client";
+            var tunnelType = "client";
+            
+            Parser.Default.ParseArguments<Options>(args)
+                   .WithParsed<Options>(o =>
+                   {
+                       if (o.Verbose)
+                       {
+                           Console.WriteLine($"Verbose output enabled. Current Arguments: -v {o.Verbose}");
+                           Console.WriteLine("1.0.0");
+                       }
+                       if(o.ConfigPath != null && !o.ConfigPath.Equals(""))
+                       {
+                           configPath = o.ConfigPath;
+                       }
+
+                       if (o.AdapterName != null && !o.AdapterName.Equals(""))
+                       {
+                           adapterName = o.AdapterName;
+                       }
+
+                       if (o.TunnelType != null && !o.TunnelType.Equals(""))
+                       {
+                           tunnelType = o.TunnelType;
+                       }
+                   });
+
+            if (!System.IO.Path.IsPathRooted(configPath))
+            {
+                var baseName = System.IO.Path.GetDirectoryName(Environment.ProcessPath);
+                configPath = System.IO.Path.Combine(baseName, configPath);
+            }
+             
+            if (!File.Exists(configPath))
             {
                 Console.WriteLine("Not Found : Config File");
                 return;
             }
             
             //Get Conf File
-            var adapterName = "client";
-            var tunnelType = "client";
+           
 
             _adapterGuid = Guid.Parse("{0xdeadc001,0xbeef,0xbabe,{0x01,0x23,0x45,0x67,0x89,0xab,0xcd,0xef}}");
 
@@ -67,7 +114,7 @@ namespace Example // Note: actual namespace depends on the project name.
             _adapter.Init(ref _adapterGuid, out _adapterLuid);
 
             //Read all line from config file
-            var configAllLinesLine = File.ReadAllLines(configFile);
+            var configAllLinesLine = File.ReadAllLines(configPath);
             _adapter.ParseConfFile(configAllLinesLine, out WgConfig);
 
             
