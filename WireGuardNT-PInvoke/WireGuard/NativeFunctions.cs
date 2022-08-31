@@ -38,5 +38,8 @@ namespace WireGuardNT_PInvoke.WireGuard
 
         [DllImport("wireguard.dll", CharSet = CharSet.Auto, EntryPoint = "WireGuardGetRunningDriverVersion", CallingConvention = CallingConvention.StdCall, SetLastError = true)]
         internal static extern int getRunningDriverVersion();
+        
+        [DllImport("wireguard.dll", CharSet = CharSet.Auto, EntryPoint = "WireGuardSetAdapterLogging", CallingConvention = CallingConvention.StdCall, SetLastError = true)]
+        internal static extern bool setAdapterLogging(IntPtr adapter, WireGuardAdapterLoggerLevel loggingLevel);
     }
 }

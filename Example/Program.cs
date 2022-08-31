@@ -44,8 +44,8 @@ namespace Example // Note: actual namespace depends on the project name.
             var baseName = System.IO.Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName); 
             var configFile = System.IO.Path.Combine(baseName, "client.conf");
             //Get Conf File
-            var adapterName = "wgtest";
-            var tunnelType = "wgtest";
+            var adapterName = "client";
+            var tunnelType = "client";
 
             _adapterGuid = Guid.Parse("{0xdeadc001,0xbeef,0xbabe,{0x01,0x23,0x45,0x67,0x89,0xab,0xcd,0xef}}");
 
@@ -66,9 +66,12 @@ namespace Example // Note: actual namespace depends on the project name.
 
             Vanara.PInvoke.IpHlpApi.InitializeIpForwardEntry(out _ipforwardRow2);
             _ipforwardRow2.InterfaceLuid = _adapterLuid;
+            _ipforwardRow2.NextHop.Ipv4.sin_addr = Ws2_32.IN_ADDR.INADDR_ANY;
             _ipforwardRow2.NextHop.si_family = Ws2_32.ADDRESS_FAMILY.AF_INET;
             _ipforwardRow2.Metric = 0;
+            _ipforwardRow2.DestinationPrefix.Prefix.Ipv4.sin_addr = Ws2_32.IN_ADDR.INADDR_ANY;
             _ipforwardRow2.DestinationPrefix.Prefix.si_family = Ws2_32.ADDRESS_FAMILY.AF_INET;
+            
             lastError = Vanara.PInvoke.IpHlpApi.CreateIpForwardEntry2(ref _ipforwardRow2);
             if (lastError.Failed)
             {
@@ -93,6 +96,7 @@ namespace Example // Note: actual namespace depends on the project name.
             Vanara.PInvoke.IpHlpApi.InitializeIpInterfaceEntry(out _IpInterfaceRow);
             _IpInterfaceRow.InterfaceLuid = _adapterLuid;
             _IpInterfaceRow.Family = Ws2_32.ADDRESS_FAMILY.AF_INET;
+            _IpInterfaceRow.InterfaceIndex = 0;
 
 
             lastError = Vanara.PInvoke.IpHlpApi.GetIpInterfaceEntry(ref _IpInterfaceRow);
@@ -106,6 +110,7 @@ namespace Example // Note: actual namespace depends on the project name.
             _IpInterfaceRow.UseAutomaticMetric = false;
             _IpInterfaceRow.Metric = 0;
             _IpInterfaceRow.NlMtu = WgConfig.InterfaceMtu;
+            _IpInterfaceRow.SitePrefixLength = 0;
 
             lastError = Vanara.PInvoke.IpHlpApi.SetIpInterfaceEntry(_IpInterfaceRow);
 
@@ -114,6 +119,12 @@ namespace Example // Note: actual namespace depends on the project name.
                 //Failed to set metric and MTU
                 Console.WriteLine("SetIpInterfaceEntry " + lastError.ToString());
             }
+
+            foreach (var dnsAddress in WgConfig.DnsAddresses)
+            {
+                Process.Start("netsh.exe", String.Format("interface ipv4 add dnsservers name={0} address={1} validate=no", adapterName, dnsAddress));
+            }
+
 
 
             _adapter.SetConfiguration(WgConfig);

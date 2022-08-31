@@ -154,6 +154,12 @@ namespace WireGuardNT_PInvoke.WireGuard
         WIREGUARD_LOG_WARN,
         WIREGUARD_WIREGUARD_LOG_ERRLOG_WARN,
     };
+    public enum WireGuardAdapterLoggerLevel : UInt32
+    {
+        WIREGUARD_LOG_OFF,
+        WIREGUARD_LOG_ON,
+        WIREGUARD_LOG_ON_PREFIX,
+    };
 
 
 }

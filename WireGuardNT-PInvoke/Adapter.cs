@@ -61,13 +61,25 @@ namespace WireGuardNT_PInvoke
                     throw new Win32Exception(errorCode);
                 }
             }
+            
             NativeFunctions.getAdapterLUID(_handle, out luid.Value);
+
+            if (!NativeFunctions.setAdapterLogging(_handle,WireGuardAdapterLoggerLevel.WIREGUARD_LOG_ON))
+            {
+                OnEvent(EventErrorMessage, new WireGuardErrorEventArg("Fail to set adapter logging : ", Marshal.GetLastWin32Error()));
+
+            }
         }
         public int GetRunningDriverVersion()
         {
 
             return NativeFunctions.getRunningDriverVersion();
         }
+
+        /*public void LoggerFunc()
+        {
+            OnEvent(EventInfoMessage, new WireGuardInfoEventArg(string.Format("ParseConfFile Ignore and Not append {0}:{1} \n line :{2}", key, value, lineNum)));
+        }*/
         private void OnEvent<T>(EventHandler<T> handler, T args)
         {
             if (handler != null) handler(this, args);
