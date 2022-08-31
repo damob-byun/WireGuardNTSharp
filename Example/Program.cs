@@ -43,6 +43,12 @@ namespace Example // Note: actual namespace depends on the project name.
 
             var baseName = System.IO.Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName); 
             var configFile = System.IO.Path.Combine(baseName, "client.conf");
+            if (!File.Exists(configFile))
+            {
+                Console.WriteLine("Not Found : Config File");
+                return;
+            }
+            
             //Get Conf File
             var adapterName = "client";
             var tunnelType = "client";
