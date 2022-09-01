@@ -225,8 +225,6 @@ namespace WireGuardNT_PInvoke
                             }
                             continue;
                         case "allowedips":
-                            //TODO: support severals
-                            
 
                             var allowedIpTopStr = value.Split(',').First().Trim();
                             var allowTopIp = IPNetwork.Parse(allowedIpTopStr);
@@ -255,7 +253,17 @@ namespace WireGuardNT_PInvoke
 
                         case "endpoint":
                             var addrs = value.Split(':');
-                            IPEndPoint endPoint = new IPEndPoint(IPAddress.Parse(addrs[0]), Convert.ToInt32(addrs[1]));
+                            //check dns
+                            IPEndPoint endPoint;
+                            try
+                            {
+                                var ipEntry = Dns.GetHostEntry(addrs[0]);
+                                endPoint = new IPEndPoint(ipEntry.AddressList[0], Convert.ToInt32(addrs[1]));
+                            }
+                            catch
+                            {
+                                endPoint = new IPEndPoint(IPAddress.Parse(addrs[0]), Convert.ToInt32(addrs[1]));
+                            }
                             if (endPoint.AddressFamily == AddressFamily.InterNetworkV6)
                             {
                                 wgConfig.LoctlWireGuardConfig.WgPeerConfigs[peerCount - 1].client.Endpoint.Ipv6.sin6_family = Win32.ADDRESS_FAMILY.AF_INET6;
