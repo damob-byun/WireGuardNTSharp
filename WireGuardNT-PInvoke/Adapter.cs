@@ -118,7 +118,6 @@ namespace WireGuardNT_PInvoke
 
 
             wgConfig.LoctlWireGuardConfig.WgPeerConfigs = new loctlWgPeerConfig[peerSize];
-            wgConfig.Peers = new WGPeer[peerSize];
 
             foreach (var line in lines)
             {
@@ -206,7 +205,6 @@ namespace WireGuardNT_PInvoke
 
                 if (IsPeerSection)
                 {
-                    var Peer = wgConfig.Peers[peerCount - 1];
                     switch (key)
                     {
                         case "publickey":
@@ -228,16 +226,7 @@ namespace WireGuardNT_PInvoke
                             continue;
                         case "allowedips":
                             //TODO: support severals
-                            var allowedIpStrArr = value.Split(',');
-                            //Peer.AllowedIPs = new AllowedIP[allowedIpStrArr.Length];
                             
-                            for (int i = 0; i < allowedIpStrArr.Length; i++)
-                            {
-                                var allowedIpStr = allowedIpStrArr[i];
-                                var allowIpObj = IPNetwork.Parse(allowedIpStr);
-                               // Peer.AllowedIPs[i].Address = allowIpObj.Network;
-                               // Peer.AllowedIPs[i].Cidr = allowIpObj.Cidr;
-                            }
 
                             var allowedIpTopStr = value.Split(',').First().Trim();
                             var allowTopIp = IPNetwork.Parse(allowedIpTopStr);
