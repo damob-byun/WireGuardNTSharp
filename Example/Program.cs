@@ -117,8 +117,8 @@ namespace Example // Note: actual namespace depends on the project name.
             _adapter.ParseConfFile(configAllLinesLine, out WgConfig);
 
 
-            MIB_IPFORWARD_TABLE2 table;
-            lastError = Vanara.PInvoke.IpHlpApi.GetIpForwardTable2(Ws2_32.ADDRESS_FAMILY.AF_INET, out table);
+            //MIB_IPFORWARD_TABLE2 table;
+            lastError = GetIpForwardTable2(Ws2_32.ADDRESS_FAMILY.AF_INET, out MIB_IPFORWARD_TABLE2 table);
             if (lastError.Failed)
             {
                 //Failed to get default route
@@ -132,7 +132,7 @@ namespace Example // Note: actual namespace depends on the project name.
                 if (row.InterfaceLuid.Equals(_adapterLuid))
                 {
                     Console.WriteLine("Start Delete Row [" + i + "] - Metric " + row.Metric);
-                    Vanara.PInvoke.IpHlpApi.DeleteIpForwardEntry2(ref table.Table[i]);
+                    DeleteIpForwardEntry2(ref table.Table[i]);
                 }
 
             }
@@ -140,8 +140,8 @@ namespace Example // Note: actual namespace depends on the project name.
             for (var i = 0; i < WgConfig.LoctlWireGuardConfig.WgPeerConfigs.Length; i++)
             {
                 var peerConfig = WgConfig.LoctlWireGuardConfig.WgPeerConfigs[i];
-                Vanara.PInvoke.IpHlpApi.MIB_IPFORWARD_ROW2 row;
-                Vanara.PInvoke.IpHlpApi.InitializeIpForwardEntry(out row);
+                MIB_IPFORWARD_ROW2 row;
+                InitializeIpForwardEntry(out row);
                 row.InterfaceLuid = _adapterLuid;
 
                 row.Metric = 1;
@@ -157,7 +157,7 @@ namespace Example // Note: actual namespace depends on the project name.
                 row.NextHop.Ipv4.sin_addr = Ws2_32.IN_ADDR.INADDR_ANY;
                 row.NextHop.si_family = Ws2_32.ADDRESS_FAMILY.AF_INET;
 
-                lastError = Vanara.PInvoke.IpHlpApi.CreateIpForwardEntry2(ref row);
+                lastError = CreateIpForwardEntry2(ref row);
                 if (lastError.Failed)
                 {
                     //Failed to set default route
@@ -171,16 +171,16 @@ namespace Example // Note: actual namespace depends on the project name.
             }
 
 
+            
+            //MIB_UNICASTIPADDRESS_ROW unicastIpAddressRow;
+            InitializeUnicastIpAddressEntry(out MIB_UNICASTIPADDRESS_ROW unicastIpAddressRow);
+            unicastIpAddressRow.InterfaceLuid = _adapterLuid;
+            unicastIpAddressRow.Address.Ipv4.sin_addr = new Ws2_32.IN_ADDR(WgConfig.InterfaceAddress.GetAddressBytes());
+            unicastIpAddressRow.Address.Ipv4.sin_family = Ws2_32.ADDRESS_FAMILY.AF_INET;
+            unicastIpAddressRow.OnLinkPrefixLength = WgConfig.InterfaceNetwork.Cidr;
+            unicastIpAddressRow.DadState = NL_DAD_STATE.IpDadStatePreferred;
 
-            Vanara.PInvoke.IpHlpApi.MIB_UNICASTIPADDRESS_ROW unicastipaddressRow;
-            Vanara.PInvoke.IpHlpApi.InitializeUnicastIpAddressEntry(out unicastipaddressRow);
-            unicastipaddressRow.InterfaceLuid = _adapterLuid;
-            unicastipaddressRow.Address.Ipv4.sin_addr = new Ws2_32.IN_ADDR(WgConfig.InterfaceAddress.GetAddressBytes());
-            unicastipaddressRow.Address.Ipv4.sin_family = Ws2_32.ADDRESS_FAMILY.AF_INET;
-            unicastipaddressRow.OnLinkPrefixLength = WgConfig.InterfaceNetwork.Cidr;
-            unicastipaddressRow.DadState = NL_DAD_STATE.IpDadStatePreferred;
-
-            lastError = Vanara.PInvoke.IpHlpApi.CreateUnicastIpAddressEntry(ref unicastipaddressRow);
+            lastError = CreateUnicastIpAddressEntry(ref unicastIpAddressRow);
             if (lastError.Failed)
             {
                 //Failed to set IP address
@@ -190,12 +190,12 @@ namespace Example // Note: actual namespace depends on the project name.
             {
                 Console.WriteLine("Set Ip address " + lastError.ToString());
             }
-            Vanara.PInvoke.IpHlpApi.MIB_IPINTERFACE_ROW IpInterfaceRow;
-            Vanara.PInvoke.IpHlpApi.InitializeIpInterfaceEntry(out IpInterfaceRow);
-            IpInterfaceRow.InterfaceLuid = _adapterLuid;
-            IpInterfaceRow.Family = Ws2_32.ADDRESS_FAMILY.AF_INET;
+            //MIB_IPINTERFACE_ROW ipInterfaceRow;
+            InitializeIpInterfaceEntry(out MIB_IPINTERFACE_ROW ipInterfaceRow);
+            ipInterfaceRow.InterfaceLuid = _adapterLuid;
+            ipInterfaceRow.Family = Ws2_32.ADDRESS_FAMILY.AF_INET;
 
-            lastError = Vanara.PInvoke.IpHlpApi.GetIpInterfaceEntry(ref IpInterfaceRow);
+            lastError = GetIpInterfaceEntry(ref ipInterfaceRow);
 
             if (lastError.Failed)
             {
@@ -207,14 +207,14 @@ namespace Example // Note: actual namespace depends on the project name.
                 Console.WriteLine("Set Ip address " + lastError.ToString());
             }
 
-            IpInterfaceRow.ForwardingEnabled = true;
+            ipInterfaceRow.ForwardingEnabled = true;
 
-            IpInterfaceRow.UseAutomaticMetric = false;
-            IpInterfaceRow.Metric = 0;
-            IpInterfaceRow.NlMtu = WgConfig.InterfaceMtu;
-            IpInterfaceRow.SitePrefixLength = 0;
+            ipInterfaceRow.UseAutomaticMetric = false;
+            ipInterfaceRow.Metric = 0;
+            ipInterfaceRow.NlMtu = WgConfig.InterfaceMtu;
+            ipInterfaceRow.SitePrefixLength = 0;
 
-            lastError = Vanara.PInvoke.IpHlpApi.SetIpInterfaceEntry(IpInterfaceRow);
+            lastError = SetIpInterfaceEntry(ipInterfaceRow);
 
             if (lastError.Failed)
             {
