@@ -5,11 +5,14 @@
 WireGuardNT-PInvoke library written in C# targeting .NET Standard 2.0. Version.
 
 
-# Example
+# WireGuard-Cli
 
 Save the configuration file to the path of the Example program, and then use the following code to load the configuration file.
 
-Also, I created example project with reference to the following link.  [WireGuardNT/Example.C](https://git.zx2c4.com/wireguard-nt/plain/example/example.c)
+Also, I created project with reference to the following link.  
+
+[WireGuardNT/Example.C](https://git.zx2c4.com/wireguard-nt/plain/example/example.c)
+[WireGuardNT/embeddable-dll-service](https://git.zx2c4.com/wireguard-windows/about/embeddable-dll-service/README.md)
 
 
 ### client.conf
@@ -17,10 +20,10 @@ Also, I created example project with reference to the following link.  [WireGuar
 [Interface]
 Address = 10.0.0.2/24
 ListenPort = 51820
-PrivateKey = YOQ2Kcx6FVsrZSaXtR3+hoqIJfKKFSFzWf24kgsnjnA=
+PrivateKey = ==SOME===PRIVATE===key==
 
 [Peer]
-PublicKey = ytdGlKJuadDzZPOIPCDpXeJxLCQoGnmtwoUgNJ8aT3g=
+PublicKey = ==SOME===PUBLIC===KEY==
 AllowedIPs = 0.0.0.0/0, ::/0
 Endpoint = myserver.dyndns.org:51820
 ```
@@ -45,11 +48,13 @@ var adapterGuid = Guid.Parse("{0xdeadc001,0xbeef,0xbabe,{0x01,0x23,0x45,0x67,0x8
 var adapter = new Adapter(adapterName, tunnelType);
 adapter.ParseConfFile(configAllLinesLine, out WgConfig);
 ...
+adapter.SetConfiguration(WgConfig);
+adapter.SetStateUp();
 ```
 And Run the program.
 
 ```
-Visual Studio -> Start Example
+Visual Studio -> Choose WireGuard-Cli -> Run
 Run Cmd -> netsh interface show interface or ipconfig
 ```
 
