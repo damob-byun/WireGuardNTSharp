@@ -313,29 +313,8 @@ namespace WireGuardNT_PInvoke
             }
             return true;
         }
-
-        /*private void SetDNS(string[] dnsStrs)
-        {
-            var objMc = new ManagementClass("Win32_NetworkAdapterConfiguration");
-            var objMoc = objMc.GetInstances();
-            foreach (ManagementObject objMo in objMoc)
-            {
-                if ((bool)objMo["IPEnabled"])
-                {
-                    if (objMo["ServiceName"].ToString().Equals("WireGuard"))
-                    {
-                        ManagementBaseObject objDns = objMo.GetMethodParameters("SetDNSServerSearchOrder");
-                        if (objDns != null)
-                        {
-                            objDns["DNSServerSearchOrder"] = dnsStrs;
-                            objMo.InvokeMethod("SetDNSServerSearchOrder", objDns, null);
-                        }
-                    }
-                }
-            }
-        }*/
         
-        public unsafe void SetConfiguration(WgConfig wgConfig)
+        public void SetConfiguration(WgConfig wgConfig)
         {
             var _loctlWireGuardConfig = wgConfig.LoctlWireGuardConfig;
 

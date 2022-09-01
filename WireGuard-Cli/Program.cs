@@ -85,7 +85,10 @@ namespace WireGuardCli // Note: actual namespace depends on the project name.
             if (!System.IO.Path.IsPathRooted(configPath))
             {
                 var baseName = System.IO.Path.GetDirectoryName(Environment.ProcessPath);
-                configPath = System.IO.Path.Combine(baseName, configPath);
+                if (baseName != null)
+                {
+                    configPath = System.IO.Path.Combine(baseName, configPath);
+                }
             }
 
             if (!File.Exists(configPath))
