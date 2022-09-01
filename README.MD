@@ -76,6 +76,7 @@ Usage: WireGuard-Cli.exe [OPTION...]
 # TODO
 
 ``` TODO
+[ ] IPv6 Support
 [ ] Code Refactor
 [ ] Nuget Package
 [ ] Add more example
