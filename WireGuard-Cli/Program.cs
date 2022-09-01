@@ -8,7 +8,7 @@ using WireGuardNT_PInvoke;
 using WireGuardNT_PInvoke.WireGuard;
 using static Vanara.PInvoke.IpHlpApi;
 
-namespace Example // Note: actual namespace depends on the project name.
+namespace WireGuardCli // Note: actual namespace depends on the project name.
 {
 
     internal class Program
@@ -16,8 +16,6 @@ namespace Example // Note: actual namespace depends on the project name.
         private static Adapter? _adapter = null;
         private static Guid _adapterGuid;
         private static NET_LUID _adapterLuid;
-
-
 
         private static WgConfig WgConfig = new WgConfig();
 

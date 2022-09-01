@@ -65,7 +65,7 @@ Run Cmd -> netsh interface show interface or ipconfig
 [Release](https://github.com/damob-byun/WireGuardNTSharp/releases)
 
 ```
-Usage: Example.exe [OPTION...]
+Usage: WireGuard-Cli.exe [OPTION...]
  -v          version
  -c          config "config file path" default path is "client.conf"
  -n          name "adapter name" default name is "client"

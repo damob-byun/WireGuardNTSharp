@@ -5,7 +5,7 @@ VisualStudioVersion = 17.3.32819.101
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WireGuardNT-PInvoke", "WireGuardNT-PInvoke\WireGuardNT-PInvoke.csproj", "{9D46F774-A797-4FC9-8642-3193312D3124}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Example", "Example\Example.csproj", "{DA0790E6-903F-4A80-9C51-96020FD05D6F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WireGuard-Cli", "WireGuard-Cli\WireGuard-Cli.csproj", "{DA0790E6-903F-4A80-9C51-96020FD05D6F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
