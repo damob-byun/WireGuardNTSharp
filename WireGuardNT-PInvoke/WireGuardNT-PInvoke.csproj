@@ -4,7 +4,19 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <RootNamespace>WireGuardNT_PInvoke</RootNamespace>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <Authors>damob.byun</Authors>
+    <PackageProjectUrl>https://github.com/damob-byun/WireGuardNTSharp</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/damob-byun/WireGuardNTSharp</RepositoryUrl>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\LICENSE">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="IPNetwork2" Version="2.6.461" />

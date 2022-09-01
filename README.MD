@@ -72,7 +72,12 @@ Usage: WireGuard-Cli.exe [OPTION...]
  -t          type "tunnel type" default type is "client"
  ```
 
+# Nuget Package
 
+[WireGuardNT-PInvoke](https://www.nuget.org/packages/WireGuardNT-PInvoke)
+```
+Install-Package WireGuardNT-PInvoke 
+```
 # TODO
 
 ``` TODO
