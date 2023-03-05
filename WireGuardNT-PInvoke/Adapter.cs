@@ -92,7 +92,6 @@ namespace WireGuardNT_PInvoke
 
         public bool ParseConfFile(string[] lines, out WgConfig wgConfig )
         {
-            //TODO: Resolve EndPoint, Set DNS
             //Dns.GetHostEntry(host).AddressList.First(addr => addr.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
             //loctlWireGuardConfig _loctlWireGuardConfig = wgConfig.LoctlWireGuardConfig;
             wgConfig = new WgConfig();
@@ -109,11 +108,6 @@ namespace WireGuardNT_PInvoke
                 {
                     peerSize++;
                 }
-                if (lineLower.StartsWith("endpoint"))
-                {
-                    //TODO: support endpoints
-                    //List<IPNetwork> allowedIps = new List<IPNetwork>();
-                }
             }
 
 
@@ -125,7 +119,7 @@ namespace WireGuardNT_PInvoke
                 
                 if (line.StartsWith("#"))
                 {
-                    continue; ;
+                    continue;
                 }
                 var lineLower = line.Trim().ToLower();
                 if (lineLower.Length == 0)
@@ -255,15 +249,15 @@ namespace WireGuardNT_PInvoke
                             var addrs = value.Split(':');
                             //check dns
                             IPEndPoint endPoint;
-                            try
+                            if (ValidateIPv4(addrs[0]))
                             {
-                                var ipEntry = Dns.GetHostEntry(addrs[0]);
-                                endPoint = new IPEndPoint(ipEntry.AddressList[0], Convert.ToInt32(addrs[1]));
+                                    endPoint = new IPEndPoint(IPAddress.Parse(addrs[0]), Convert.ToInt32(addrs[1]));
                             }
-                            catch
-                            {
-                                endPoint = new IPEndPoint(IPAddress.Parse(addrs[0]), Convert.ToInt32(addrs[1]));
-                            }
+                                else
+                                {
+                                    var ipEntry = Dns.GetHostEntry(addrs[0]);
+                                    endPoint = new IPEndPoint(ipEntry.AddressList[0], Convert.ToInt32(addrs[1]));
+                                }
                             if (endPoint.AddressFamily == AddressFamily.InterNetworkV6)
                             {
                                 wgConfig.LoctlWireGuardConfig.WgPeerConfigs[peerCount - 1].client.Endpoint.Ipv6.sin6_family = Win32.ADDRESS_FAMILY.AF_INET6;
@@ -313,7 +307,26 @@ namespace WireGuardNT_PInvoke
             }
             return true;
         }
-        
+        public bool ValidateIPv4(string ipString)
+        {
+            if (String.IsNullOrWhiteSpace(ipString))
+            {
+                return false;
+            }
+
+            string[] splitValues = ipString.Split('.');
+            if (splitValues.Length != 4)
+            {
+                return false;
+            }
+
+            byte tempForParsing;
+
+            return splitValues.All(r => byte.TryParse(r, out tempForParsing));
+
+        }
+
+
         public void SetConfiguration(WgConfig wgConfig)
         {
             var _loctlWireGuardConfig = wgConfig.LoctlWireGuardConfig;
