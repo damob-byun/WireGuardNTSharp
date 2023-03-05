@@ -9,6 +9,7 @@
     <PackageProjectUrl>https://github.com/damob-byun/WireGuardNTSharp</PackageProjectUrl>
     <RepositoryUrl>https://github.com/damob-byun/WireGuardNTSharp</RepositoryUrl>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <Version>1.0.4</Version>
   </PropertyGroup>
 
   <ItemGroup>
