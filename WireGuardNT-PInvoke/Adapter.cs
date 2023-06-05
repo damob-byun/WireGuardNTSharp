@@ -1,17 +1,12 @@
 ﻿using System;
 using System.Buffers.Binary;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Drawing;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Xml.Linq;
 using Vanara.PInvoke;
 using WireGuardNT_PInvoke.WireGuard;
-using static Vanara.PInvoke.IpHlpApi;
 
 namespace WireGuardNT_PInvoke
 {
@@ -31,7 +26,7 @@ namespace WireGuardNT_PInvoke
             Name = name;
             TunnelType = tunnelType;
             _lastGetGuess = 1024;
-            
+
         }
 
         public void Init(ref Guid guid, out IpHlpApi.NET_LUID luid)
@@ -61,10 +56,10 @@ namespace WireGuardNT_PInvoke
                     throw new Win32Exception(errorCode);
                 }
             }
-            
+
             NativeFunctions.getAdapterLUID(_handle, out luid.Value);
 
-            if (!NativeFunctions.setAdapterLogging(_handle,WireGuardAdapterLoggerLevel.WIREGUARD_LOG_ON))
+            if (!NativeFunctions.setAdapterLogging(_handle, WireGuardAdapterLoggerLevel.WIREGUARD_LOG_ON))
             {
                 OnEvent(EventErrorMessage, new WireGuardErrorEventArg("Fail to set adapter logging : ", Marshal.GetLastWin32Error()));
 
@@ -90,7 +85,7 @@ namespace WireGuardNT_PInvoke
             return wireGuardAdapterState;
         }
 
-        public bool ParseConfFile(string[] lines, out WgConfig wgConfig )
+        public bool ParseConfFile(string[] lines, out WgConfig wgConfig)
         {
             //Dns.GetHostEntry(host).AddressList.First(addr => addr.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
             //loctlWireGuardConfig _loctlWireGuardConfig = wgConfig.LoctlWireGuardConfig;
@@ -100,7 +95,7 @@ namespace WireGuardNT_PInvoke
             var peerCount = 0;
             var peerSize = 0;
             var lineNum = 0;
-            
+
             foreach (var line in lines)
             {
                 var lineLower = line.Trim().ToLower();
@@ -116,7 +111,7 @@ namespace WireGuardNT_PInvoke
             foreach (var line in lines)
             {
                 lineNum++;
-                
+
                 if (line.StartsWith("#"))
                 {
                     continue;
@@ -126,7 +121,7 @@ namespace WireGuardNT_PInvoke
                 {
                     continue;
                 }
-                
+
                 if (lineLower == "[interface]")
                 {
                     IsInterFaceSection = true;
@@ -144,14 +139,14 @@ namespace WireGuardNT_PInvoke
                 if (!IsPeerSection && !IsInterFaceSection)
                 {
                     OnEvent(EventErrorMessage, new WireGuardErrorEventArg("ParseConfFile Error : No Section In conf File \n line :", lineNum));
-                    
+
                 }
 
                 var confArray = line.Split('=').Select(s => s.Trim()).ToArray();
 
                 if (confArray.Length < 1)
                 {
-                    
+
                     OnEvent(EventErrorMessage, new WireGuardErrorEventArg("ParseConfFile Error : No = Separator \n line :", lineNum));
                     continue;
                     //return false;
@@ -171,7 +166,7 @@ namespace WireGuardNT_PInvoke
                             var privateKey = Convert.FromBase64String(value);
                             fixed (byte* p = wgConfig.LoctlWireGuardConfig.Interfaze.PrivateKey)
                             {
-                                Marshal.Copy(privateKey, 0, (IntPtr) p, 32);
+                                Marshal.Copy(privateKey, 0, (IntPtr)p, 32);
                             }
                             continue;
                         case "listenport":
@@ -183,7 +178,7 @@ namespace WireGuardNT_PInvoke
                             wgConfig.InterfaceMtu = Convert.ToUInt16(value);
                             continue;
                         case "address":
-                            wgConfig.InterfaceNetwork = IPNetwork.Parse(value);
+                            wgConfig.InterfaceNetwork = IPNetwork.Parse(value.Split(',').First());
                             var ipStr = value.Split('/').First().Trim();
                             wgConfig.InterfaceAddress = IPAddress.Parse(ipStr);
                             continue;
@@ -204,7 +199,7 @@ namespace WireGuardNT_PInvoke
                         case "publickey":
                             wgConfig.LoctlWireGuardConfig.WgPeerConfigs[peerCount - 1].client.Flags |= IoctlPeerFlags.HasPublicKey;
                             var publicKey = Convert.FromBase64String(value);
-                            
+
                             fixed (byte* p = wgConfig.LoctlWireGuardConfig.WgPeerConfigs[peerCount - 1].client.PublicKey)
                             {
                                 Marshal.Copy(publicKey, 0, (IntPtr)p, 32);
@@ -222,7 +217,7 @@ namespace WireGuardNT_PInvoke
 
                             var allowedIpTopStr = value.Split(',').First().Trim();
                             var allowTopIp = IPNetwork.Parse(allowedIpTopStr);
-                            
+
                             if (allowTopIp.AddressFamily == AddressFamily.InterNetworkV6)
                             {
                                 wgConfig.LoctlWireGuardConfig.WgPeerConfigs[peerCount - 1].allowdIp.AddressFamily = Win32.ADDRESS_FAMILY.AF_INET6;
@@ -251,13 +246,13 @@ namespace WireGuardNT_PInvoke
                             IPEndPoint endPoint;
                             if (ValidateIPv4(addrs[0]))
                             {
-                                    endPoint = new IPEndPoint(IPAddress.Parse(addrs[0]), Convert.ToInt32(addrs[1]));
+                                endPoint = new IPEndPoint(IPAddress.Parse(addrs[0]), Convert.ToInt32(addrs[1]));
                             }
-                                else
-                                {
-                                    var ipEntry = Dns.GetHostEntry(addrs[0]);
-                                    endPoint = new IPEndPoint(ipEntry.AddressList[0], Convert.ToInt32(addrs[1]));
-                                }
+                            else
+                            {
+                                var ipEntry = Dns.GetHostEntry(addrs[0]);
+                                endPoint = new IPEndPoint(ipEntry.AddressList[0], Convert.ToInt32(addrs[1]));
+                            }
                             if (endPoint.AddressFamily == AddressFamily.InterNetworkV6)
                             {
                                 wgConfig.LoctlWireGuardConfig.WgPeerConfigs[peerCount - 1].client.Endpoint.Ipv6.sin6_family = Win32.ADDRESS_FAMILY.AF_INET6;
@@ -270,7 +265,7 @@ namespace WireGuardNT_PInvoke
                                 wgConfig.LoctlWireGuardConfig.WgPeerConfigs[peerCount - 1].client.Endpoint.Ipv4.sin_family = Win32.ADDRESS_FAMILY.AF_INET;
                                 wgConfig.LoctlWireGuardConfig.WgPeerConfigs[peerCount - 1].client.Endpoint.Ipv4.sin_port = BitConverter.IsLittleEndian ? (ushort)BinaryPrimitives.ReverseEndianness((short)endPoint.Port) : (ushort)endPoint.Port;
                                 wgConfig.LoctlWireGuardConfig.WgPeerConfigs[peerCount - 1].client.Endpoint.Ipv4.sin_addr.Addr = endPoint.Address;
-                                
+
                             }
                             wgConfig.LoctlWireGuardConfig.WgPeerConfigs[peerCount - 1].client.Flags |= IoctlPeerFlags.HasEndpoint;
                             continue;
@@ -280,7 +275,7 @@ namespace WireGuardNT_PInvoke
                             continue;
                     }
                 }
-                
+
 
 
             }
@@ -335,7 +330,7 @@ namespace WireGuardNT_PInvoke
             var byteCursor = 0;
             var interfaze = _loctlWireGuardConfig.Interfaze;
             var interfazeSize = Marshal.SizeOf(interfaze);
-            
+
 
             totalSize += interfazeSize;
             for (var i = 0; i < _loctlWireGuardConfig.WgPeerConfigs.Length; i++)
@@ -344,7 +339,7 @@ namespace WireGuardNT_PInvoke
                 var configSize = Marshal.SizeOf(wgPeerConfig);
                 totalSize += configSize;
             }
-            
+
 
             wgConfig.ConfigBuffer = new ConfigBuffer(totalSize);
 
@@ -375,7 +370,7 @@ namespace WireGuardNT_PInvoke
         }
         private bool SetConfiguration(ConfigBuffer wireGuardConfig, int totalSize)
         {
-            
+
 
             var setConfigResult = NativeFunctions.setConfiguration(_handle, wireGuardConfig.BufferPointer, (uint)totalSize);
             if (!setConfigResult)
@@ -471,7 +466,7 @@ namespace WireGuardNT_PInvoke
                         }
                         else if (ioctlAllowedIP->AddressFamily == Win32.ADDRESS_FAMILY.AF_INET6)
                         {
-                           
+
                             //Marshal.Copy((IntPtr)ioctlAllowedIP->V6.bytes, ip, 0, 16);
                             allowedIP.Address = ioctlAllowedIP->V6.Addr;
                         }
