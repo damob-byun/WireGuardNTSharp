@@ -178,12 +178,30 @@ namespace WireGuardNT_PInvoke
                             wgConfig.InterfaceMtu = Convert.ToUInt16(value);
                             continue;
                         case "address":
-                            wgConfig.InterfaceNetwork = IPNetwork.Parse(value.Split(',').First());
-                            var ipStr = value.Split('/').First().Trim();
-                            wgConfig.InterfaceAddress = IPAddress.Parse(ipStr);
+                            string address = value.Split(',').First().Trim();
+                            if (ValidateIPv4(address))
+                            {
+                                wgConfig.InterfaceNetwork = IPNetwork.Parse(value.Split(',').First());
+                            }
+                            else
+                            {
+                                var ipEntry = Dns.GetHostEntry(address);
+                                wgConfig.InterfaceNetwork = IPNetwork.Parse(ipEntry.AddressList[0].ToString());
+                            }
+                            
                             continue;
                         case "dns":
-                            wgConfig.DnsAddresses = value.Split(',').Select(dns => dns.Trim()).Select(dns => IPAddress.Parse(dns)).ToArray();
+                            wgConfig.DnsAddresses = value.Split(',').Select(dns => dns.Trim()).Select(dns => {
+                                if (ValidateIPv4(dns))
+                                {
+                                    return IPAddress.Parse(dns);
+                                }
+                                else
+                                {
+                                    var ipEntry = Dns.GetHostEntry(dns);
+                                    return IPAddress.Parse(ipEntry.AddressList[0].ToString());
+                                }
+                            }).ToArray();
                             continue;
                         default:
                             OnEvent(EventInfoMessage, new WireGuardInfoEventArg(string.Format("ParseConfFile Ignore and Not append {0}:{1} \n line :{2}", key, value, lineNum)));
